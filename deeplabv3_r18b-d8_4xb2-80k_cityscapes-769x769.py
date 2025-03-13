@@ -1,6 +1,6 @@
 crop_size = (
-    769,
-    769,
+    608,
+    608,
 )
 data_preprocessor = dict(
     bgr_to_rgb=True,
@@ -57,7 +57,7 @@ model = dict(
         loss_decode=dict(
             loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=19,
+        num_classes=3,
         num_convs=1,
         type='FCNHead'),
     backbone=dict(
@@ -120,7 +120,7 @@ model = dict(
         loss_decode=dict(
             loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=19,
+        num_classes=3,
         type='ASPPHead'),
     pretrained='torchvision://resnet18',
     test_cfg=dict(crop_size=(
