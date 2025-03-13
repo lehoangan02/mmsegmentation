@@ -49,20 +49,20 @@ log_processor = dict(by_epoch=False)
 model = dict(
     auxiliary_head=dict(
         align_corners=True,
-        channels=64,
+        channels=256,
         concat_input=False,
         dropout_ratio=0.1,
-        in_channels=256,
+        in_channels=1024,
         in_index=2,
         loss_decode=dict(
             loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=3,
+        num_classes=256,
         num_convs=1,
         type='FCNHead'),
     backbone=dict(
         contract_dilation=True,
-        depth=18,
+        depth=101,
         dilations=(
             1,
             1,
@@ -85,7 +85,7 @@ model = dict(
             1,
         ),
         style='pytorch',
-        type='ResNet'),
+        type='ResNetV1c'),
     data_preprocessor=dict(
         bgr_to_rgb=True,
         mean=[
@@ -107,7 +107,9 @@ model = dict(
         type='SegDataPreProcessor'),
     decode_head=dict(
         align_corners=True,
-        channels=128,
+        c1_channels=48,
+        c1_in_channels=256,
+        channels=512,
         dilations=(
             1,
             12,
@@ -115,14 +117,14 @@ model = dict(
             36,
         ),
         dropout_ratio=0.1,
-        in_channels=512,
+        in_channels=2048,
         in_index=3,
         loss_decode=dict(
             loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=3,
-        type='ASPPHead'),
-    pretrained='torchvision://resnet18',
+        num_classes=256,
+        type='DepthwiseSeparableASPPHead'),
+    pretrained='open-mmlab://resnet101_v1c',
     test_cfg=dict(crop_size=(
         608,
         608,

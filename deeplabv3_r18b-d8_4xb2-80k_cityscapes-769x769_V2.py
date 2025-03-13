@@ -1,6 +1,6 @@
 crop_size = (
-    512,
-    1024,
+    608,
+    608,
 )
 data_preprocessor = dict(
     bgr_to_rgb=True,
@@ -12,8 +12,8 @@ data_preprocessor = dict(
     pad_val=0,
     seg_pad_val=255,
     size=(
-        512,
-        1024,
+        608,
+        608,
     ),
     std=[
         58.395,
@@ -24,7 +24,7 @@ data_preprocessor = dict(
 data_root = 'data/cityscapes/'
 dataset_type = 'CityscapesDataset'
 default_hooks = dict(
-    checkpoint=dict(by_epoch=False, interval=4000, type='CheckpointHook'),
+    checkpoint=dict(by_epoch=False, interval=8000, type='CheckpointHook'),
     logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
     param_scheduler=dict(type='ParamSchedulerHook'),
     sampler_seed=dict(type='DistSamplerSeedHook'),
@@ -48,21 +48,21 @@ log_level = 'INFO'
 log_processor = dict(by_epoch=False)
 model = dict(
     auxiliary_head=dict(
-        align_corners=False,
-        channels=256,
+        align_corners=True,
+        channels=64,
         concat_input=False,
         dropout_ratio=0.1,
-        in_channels=1024,
+        in_channels=256,
         in_index=2,
         loss_decode=dict(
             loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=19,
+        num_classes=256,
         num_convs=1,
         type='FCNHead'),
     backbone=dict(
         contract_dilation=True,
-        depth=50,
+        depth=18,
         dilations=(
             1,
             1,
@@ -85,7 +85,7 @@ model = dict(
             1,
         ),
         style='pytorch',
-        type='ResNetV1c'),
+        type='ResNet'),
     data_preprocessor=dict(
         bgr_to_rgb=True,
         mean=[
@@ -96,8 +96,8 @@ model = dict(
         pad_val=0,
         seg_pad_val=255,
         size=(
-            512,
-            1024,
+            608,
+            608,
         ),
         std=[
             58.395,
@@ -106,24 +106,30 @@ model = dict(
         ],
         type='SegDataPreProcessor'),
     decode_head=dict(
-        align_corners=False,
-        channels=512,
+        align_corners=True,
+        channels=128,
+        dilations=(
+            1,
+            12,
+            24,
+            36,
+        ),
         dropout_ratio=0.1,
-        in_channels=2048,
+        in_channels=512,
         in_index=3,
         loss_decode=dict(
             loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=19,
-        pool_scales=(
-            1,
-            2,
-            3,
-            6,
-        ),
-        type='PSPHead'),
-    pretrained='open-mmlab://resnet50_v1c',
-    test_cfg=dict(mode='whole'),
+        num_classes=256,
+        type='ASPPHead'),
+    pretrained='torchvision://resnet18',
+    test_cfg=dict(crop_size=(
+        608,
+        608,
+    ), mode='slide', stride=(
+        513,
+        513,
+    )),
     train_cfg=dict(),
     type='EncoderDecoder')
 norm_cfg = dict(requires_grad=True, type='SyncBN')
@@ -136,7 +142,7 @@ param_scheduler = [
     dict(
         begin=0,
         by_epoch=False,
-        end=40000,
+        end=80000,
         eta_min=0.0001,
         power=0.9,
         type='PolyLR'),
@@ -144,7 +150,7 @@ param_scheduler = [
 resume = False
 test_cfg = dict(type='TestLoop')
 test_dataloader = dict(
-    batch_size=10000000,
+    batch_size=1,
     dataset=dict(
         data_prefix=dict(
             img_path='leftImg8bit/val', seg_map_path='gtFine/val'),
@@ -152,8 +158,8 @@ test_dataloader = dict(
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(keep_ratio=True, scale=(
-                2048,
-                1024,
+                2049,
+                1025,
             ), type='Resize'),
             dict(type='LoadAnnotations'),
             dict(type='PackSegInputs'),
@@ -169,13 +175,13 @@ test_evaluator = dict(
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(keep_ratio=True, scale=(
-        2048,
-        1024,
+        2049,
+        1025,
     ), type='Resize'),
     dict(type='LoadAnnotations'),
     dict(type='PackSegInputs'),
 ]
-train_cfg = dict(max_iters=40000, type='IterBasedTrainLoop', val_interval=4000)
+train_cfg = dict(max_iters=80000, type='IterBasedTrainLoop', val_interval=8000)
 train_dataloader = dict(
     batch_size=2,
     dataset=dict(
@@ -192,14 +198,14 @@ train_dataloader = dict(
                     2.0,
                 ),
                 scale=(
-                    2048,
-                    1024,
+                    2049,
+                    1025,
                 ),
                 type='RandomResize'),
             dict(
                 cat_max_ratio=0.75, crop_size=(
-                    512,
-                    1024,
+                    608,
+                    608,
                 ), type='RandomCrop'),
             dict(prob=0.5, type='RandomFlip'),
             dict(type='PhotoMetricDistortion'),
@@ -219,13 +225,13 @@ train_pipeline = [
             2.0,
         ),
         scale=(
-            2048,
-            1024,
+            2049,
+            1025,
         ),
         type='RandomResize'),
     dict(cat_max_ratio=0.75, crop_size=(
-        512,
-        1024,
+        608,
+        608,
     ), type='RandomCrop'),
     dict(prob=0.5, type='RandomFlip'),
     dict(type='PhotoMetricDistortion'),
@@ -259,7 +265,7 @@ tta_pipeline = [
 ]
 val_cfg = dict(type='ValLoop')
 val_dataloader = dict(
-    batch_size=20,
+    batch_size=1,
     dataset=dict(
         data_prefix=dict(
             img_path='leftImg8bit/val', seg_map_path='gtFine/val'),
@@ -267,8 +273,8 @@ val_dataloader = dict(
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(keep_ratio=True, scale=(
-                2048,
-                1024,
+                2049,
+                1025,
             ), type='Resize'),
             dict(type='LoadAnnotations'),
             dict(type='PackSegInputs'),

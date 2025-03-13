@@ -57,7 +57,7 @@ model = dict(
         loss_decode=dict(
             loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=3,
+        num_classes=256,
         num_convs=1,
         type='FCNHead'),
     backbone=dict(
@@ -85,7 +85,7 @@ model = dict(
             1,
         ),
         style='pytorch',
-        type='ResNet'),
+        type='ResNetV1c'),
     data_preprocessor=dict(
         bgr_to_rgb=True,
         mean=[
@@ -108,21 +108,21 @@ model = dict(
     decode_head=dict(
         align_corners=True,
         channels=128,
-        dilations=(
-            1,
-            12,
-            24,
-            36,
-        ),
         dropout_ratio=0.1,
         in_channels=512,
         in_index=3,
         loss_decode=dict(
             loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=False),
         norm_cfg=dict(requires_grad=True, type='SyncBN'),
-        num_classes=3,
-        type='ASPPHead'),
-    pretrained='torchvision://resnet18',
+        num_classes=256,
+        pool_scales=(
+            1,
+            2,
+            3,
+            6,
+        ),
+        type='PSPHead'),
+    pretrained='open-mmlab://resnet18_v1c',
     test_cfg=dict(crop_size=(
         608,
         608,
